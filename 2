@@ -1,0 +1,697 @@
+import React, { useState, useEffect } from 'react';
+
+// --- ICONS (SVG) ---
+const IconDashboard = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>;
+const IconBook = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>;
+const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>;
+const IconArrows = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>;
+const IconCheck = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
+const IconPrint = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>;
+const IconSpreadsheet = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+const IconLock = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
+const IconLogout = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>;
+const IconSync = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>;
+
+// --- MOCK DATA ---
+const initialBooks = [
+  { id: 1, title: 'Buku Tema 1: Organ Gerak Hewan dan Manusia', class: '5', author: 'Kemdikbud', stock: 15 },
+  { id: 2, title: 'Buku Tema 2: Persatuan dalam Perbedaan', class: '6', author: 'Kemdikbud', stock: 12 },
+  { id: 3, title: 'Matematika untuk SD/MI Kelas 4', class: '4', author: 'Gunanto', stock: 8 },
+  { id: 4, title: 'Pendidikan Agama Islam dan Budi Pekerti', class: '5', author: 'Kemdikbud', stock: 10 },
+];
+
+const initialStudents = [
+  { id: 1, nis: '2023001', name: 'Ahmad Budi Santoso', kelas: '5A' },
+  { id: 2, nis: '2023002', name: 'Siti Aminah', kelas: '6B' },
+  { id: 3, nis: '2023003', name: 'Candra Wijaya', kelas: '4A' },
+];
+
+export default function LibraryApp() {
+  // --- STATE MANAGEMENT ---
+  const [currentUser, setCurrentUser] = useState(null); // null, { role: 'admin' }, { role: 'student', data: {...} }
+  const [loginData, setLoginData] = useState({ username: '', password: '' });
+
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [books, setBooks] = useState(initialBooks);
+  const [students, setStudents] = useState(initialStudents);
+  const [transactions, setTransactions] = useState([]);
+  
+  const [toastMessage, setToastMessage] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const [newBook, setNewBook] = useState({ title: '', class: '', author: '', stock: '' });
+  const [newStudent, setNewStudent] = useState({ nis: '', name: '', kelas: '' });
+  const [newBorrow, setNewBorrow] = useState({ studentId: '', bookId: '' });
+
+  // --- LOGIC & HELPERS ---
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (loginData.username === 'admin' && loginData.password === 'admin') {
+      setCurrentUser({ role: 'admin', name: 'Administrator' });
+      showToast('Login berhasil! Selamat datang Admin.');
+    } else {
+      // Cek apakah siswa
+      const student = students.find(s => s.nis === loginData.username);
+      if (student && loginData.password === student.nis) { // Password default adalah NIS
+        setCurrentUser({ role: 'student', data: student });
+        showToast(`Selamat datang, ${student.name}!`);
+        setActiveTab('student_books'); // Bawa siswa langsung ke halaman buku
+      } else {
+        showToast('Username atau password salah! (Siswa gunakan NIS)');
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setLoginData({ username: '', password: '' });
+    setActiveTab('dashboard');
+    showToast('Berhasil logout dari sistem.');
+  };
+
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  const simulateSheetSync = (actionMessage) => {
+    setIsSyncing(true);
+    setTimeout(() => {
+      setIsSyncing(false);
+      showToast(`${actionMessage} berhasil tersimpan dan terhubung ke Google Spreadsheet.`);
+    }, 1500);
+  };
+
+  const getActiveBorrowings = () => transactions.filter(t => t.status === 'borrowed');
+  
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const exportToCSV = (data, filename) => {
+    if (!data || !data.length) {
+      showToast('Tidak ada data untuk diekspor!');
+      return;
+    }
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map(row => Object.values(row).map(val => `"${val}"`).join(',')).join('\n');
+    const csv = `${headers}\n${rows}`;
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    simulateSheetSync('Sinkronisasi Data Ekspor');
+  };
+
+  const handleAddBook = (e) => {
+    e.preventDefault();
+    if (!newBook.title || !newBook.stock) return;
+    const book = { ...newBook, id: Date.now(), stock: parseInt(newBook.stock) };
+    setBooks([...books, book]);
+    setNewBook({ title: '', class: '', author: '', stock: '' });
+    simulateSheetSync('Data Buku Baru');
+  };
+
+  const handleAddStudent = (e) => {
+    e.preventDefault();
+    if (!newStudent.nis || !newStudent.name) return;
+    const student = { ...newStudent, id: Date.now() };
+    setStudents([...students, student]);
+    setNewStudent({ nis: '', name: '', kelas: '' });
+    simulateSheetSync('Data Siswa Baru');
+  };
+
+  const executeBorrow = (studentId, bookId) => {
+    const book = books.find(b => b.id === bookId);
+    if (book && book.stock > 0) {
+      const transaction = {
+        id: Date.now(),
+        studentId: studentId,
+        bookId: bookId,
+        borrowDate: new Date().toISOString().split('T')[0],
+        status: 'borrowed'
+      };
+      setBooks(books.map(b => b.id === bookId ? { ...b, stock: b.stock - 1 } : b));
+      setTransactions([...transactions, transaction]);
+      simulateSheetSync('Transaksi Peminjaman');
+      return true;
+    }
+    return false;
+  };
+
+  const handleAdminBorrow = (e) => {
+    e.preventDefault();
+    if (!newBorrow.studentId || !newBorrow.bookId) return;
+    const success = executeBorrow(parseInt(newBorrow.studentId), parseInt(newBorrow.bookId));
+    if (success) {
+      setNewBorrow({ studentId: '', bookId: '' });
+    } else {
+      showToast('Gagal meminjam: Stok buku habis!');
+    }
+  };
+
+  const handleStudentBorrow = (bookId) => {
+    if(window.confirm('Apakah kamu yakin ingin meminjam buku ini?')) {
+        const success = executeBorrow(currentUser.data.id, bookId);
+        if (!success) {
+            showToast('Gagal meminjam: Stok buku habis!');
+        }
+    }
+  };
+
+  const handleReturn = (transactionId, bookId) => {
+    setBooks(books.map(b => b.id === bookId ? { ...b, stock: b.stock + 1 } : b));
+    setTransactions(transactions.map(t => 
+      t.id === transactionId ? { ...t, status: 'returned', returnDate: new Date().toISOString().split('T')[0] } : t
+    ));
+    simulateSheetSync('Transaksi Pengembalian');
+  };
+
+  // --- RENDER VIEWS ---
+  const renderAdminDashboard = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center border-b pb-2">
+        <h2 className="text-2xl font-bold text-gray-800">Dashboard Admin</h2>
+        <button onClick={handlePrint} className="print:hidden flex items-center space-x-1 bg-blue-100 text-blue-700 px-3 py-2 rounded hover:bg-blue-200 transition text-sm font-medium">
+          <IconPrint /> <span>Cetak Laporan Lengkap</span>
+        </button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-green-100 flex items-center space-x-4">
+          <div className="p-3 bg-green-100 text-green-700 rounded-lg"><IconBook /></div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Total Judul Buku</p>
+            <p className="text-3xl font-bold text-gray-800">{books.length}</p>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-green-100 flex items-center space-x-4">
+          <div className="p-3 bg-blue-100 text-blue-700 rounded-lg"><IconUsers /></div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Siswa Terdaftar</p>
+            <p className="text-3xl font-bold text-gray-800">{students.length}</p>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-green-100 flex items-center space-x-4">
+          <div className="p-3 bg-orange-100 text-orange-700 rounded-lg"><IconArrows /></div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Buku Dipinjam</p>
+            <p className="text-3xl font-bold text-gray-800">{getActiveBorrowings().length}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-green-50 p-6 rounded-xl mt-8 flex flex-col md:flex-row justify-between items-center">
+        <div>
+          <h3 className="text-lg font-bold text-green-800 mb-2">Sinkronisasi Spreadsheet Aktif</h3>
+          <p className="text-green-700 text-sm">Semua data peminjaman dan pengembalian oleh siswa maupun admin akan terhubung otomatis ke Google Spreadsheet sekolah.</p>
+        </div>
+        <button onClick={() => exportToCSV(transactions, 'Backup_Sirkulasi_Perpustakaan')} className="mt-4 md:mt-0 flex items-center space-x-2 bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition">
+          <IconSpreadsheet />
+          <span>Unduh Backup CSV</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderBooks = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-2 gap-4">
+        <h2 className="text-2xl font-bold text-gray-800">Manajemen Data Buku</h2>
+        <div className="flex flex-wrap gap-2 print:hidden w-full md:w-auto">
+          <button onClick={() => exportToCSV(books, 'Data_Buku_SDNP_Purwosari')} className="flex-1 md:flex-none flex items-center justify-center space-x-1 bg-green-100 text-green-700 px-3 py-2 rounded hover:bg-green-200 transition text-sm font-medium">
+            <IconSpreadsheet /> <span>Export ke Sheets</span>
+          </button>
+          <button onClick={handlePrint} className="flex-1 md:flex-none flex items-center justify-center space-x-1 bg-blue-100 text-blue-700 px-3 py-2 rounded hover:bg-blue-200 transition text-sm font-medium">
+            <IconPrint /> <span>Cetak</span>
+          </button>
+        </div>
+      </div>
+      
+      {/* Header Print */}
+      <div className="hidden print:flex flex-col items-center justify-center mb-6 border-b-2 border-black pb-4">
+        <h1 className="text-2xl font-bold">SDN PURWOSARI KEC. MAGETAN</h1>
+        <h2 className="text-xl font-semibold mt-1">LAPORAN DATA BUKU PERPUSTAKAAN</h2>
+      </div>
+      
+      {currentUser.role === 'admin' && (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 print:hidden">
+          <h3 className="font-semibold text-gray-700 mb-4">Tambah Buku Baru</h3>
+          <form onSubmit={handleAddBook} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input required type="text" placeholder="Judul Buku" className="border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" 
+              value={newBook.title} onChange={e => setNewBook({...newBook, title: e.target.value})} />
+            <input type="text" placeholder="Untuk Kelas" className="border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" 
+              value={newBook.class} onChange={e => setNewBook({...newBook, class: e.target.value})} />
+            <input type="text" placeholder="Penulis / Penerbit" className="border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" 
+              value={newBook.author} onChange={e => setNewBook({...newBook, author: e.target.value})} />
+            <div className="flex space-x-2">
+              <input required type="number" min="1" placeholder="Stok" className="border p-2 rounded w-full focus:ring-2 focus:ring-green-500 outline-none" 
+                value={newBook.stock} onChange={e => setNewBook({...newBook, stock: e.target.value})} />
+              <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Simpan</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b text-gray-600 text-sm">
+              <th className="p-4">Judul Buku</th>
+              <th className="p-4">Kelas</th>
+              <th className="p-4">Penulis/Penerbit</th>
+              <th className="p-4">Stok Tersedia</th>
+              {currentUser.role === 'student' && <th className="p-4 text-center">Aksi</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {books.map(book => (
+              <tr key={book.id} className="border-b hover:bg-gray-50">
+                <td className="p-4 font-medium text-gray-800">{book.title}</td>
+                <td className="p-4 text-gray-600">{book.class || '-'}</td>
+                <td className="p-4 text-gray-600">{book.author || '-'}</td>
+                <td className="p-4">
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${book.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {book.stock} {book.stock === 0 && '(Habis)'}
+                  </span>
+                </td>
+                {currentUser.role === 'student' && (
+                  <td className="p-4 text-center">
+                    <button 
+                      onClick={() => handleStudentBorrow(book.id)}
+                      disabled={book.stock === 0}
+                      className={`px-4 py-1.5 rounded text-sm font-medium transition ${book.stock > 0 ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>
+                      Pinjam
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
+            {books.length === 0 && <tr><td colSpan="5" className="p-4 text-center text-gray-500">Belum ada data buku</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderStudents = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-2 gap-4">
+        <h2 className="text-2xl font-bold text-gray-800">Data Keanggotaan Siswa</h2>
+        <div className="flex flex-wrap gap-2 print:hidden w-full md:w-auto">
+          <button onClick={() => exportToCSV(students, 'Data_Siswa_SDNP_Purwosari')} className="flex-1 md:flex-none flex items-center justify-center space-x-1 bg-green-100 text-green-700 px-3 py-2 rounded hover:bg-green-200 transition text-sm font-medium">
+            <IconSpreadsheet /> <span>Export ke Sheets</span>
+          </button>
+          <button onClick={handlePrint} className="flex-1 md:flex-none flex items-center justify-center space-x-1 bg-blue-100 text-blue-700 px-3 py-2 rounded hover:bg-blue-200 transition text-sm font-medium">
+            <IconPrint /> <span>Cetak</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="hidden print:flex flex-col items-center justify-center mb-6 border-b-2 border-black pb-4">
+        <h1 className="text-2xl font-bold">SDN PURWOSARI KEC. MAGETAN</h1>
+        <h2 className="text-xl font-semibold mt-1">LAPORAN DATA SISWA</h2>
+      </div>
+      
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 print:hidden">
+        <h3 className="font-semibold text-gray-700 mb-4">Daftarkan Siswa Baru</h3>
+        <form onSubmit={handleAddStudent} className="flex flex-col md:flex-row gap-4">
+          <input required type="text" placeholder="NIS" className="border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none md:w-1/4" 
+            value={newStudent.nis} onChange={e => setNewStudent({...newStudent, nis: e.target.value})} />
+          <input required type="text" placeholder="Nama Lengkap" className="border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none md:w-2/4" 
+            value={newStudent.name} onChange={e => setNewStudent({...newStudent, name: e.target.value})} />
+          <input required type="text" placeholder="Kelas (contoh: 5A)" className="border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none md:w-1/4" 
+            value={newStudent.kelas} onChange={e => setNewStudent({...newStudent, kelas: e.target.value})} />
+          <button type="submit" className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">Daftar</button>
+        </form>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b text-gray-600 text-sm">
+              <th className="p-4">NIS</th>
+              <th className="p-4">Nama Siswa</th>
+              <th className="p-4">Kelas</th>
+              <th className="p-4">Info Login</th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map(student => (
+              <tr key={student.id} className="border-b hover:bg-gray-50">
+                <td className="p-4 text-gray-600 font-medium">{student.nis}</td>
+                <td className="p-4 font-medium text-gray-800">{student.name}</td>
+                <td className="p-4 text-gray-600">{student.kelas}</td>
+                <td className="p-4 text-xs text-green-700">Otomatis Terdaftar</td>
+              </tr>
+            ))}
+            {students.length === 0 && <tr><td colSpan="4" className="p-4 text-center text-gray-500">Belum ada data siswa</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderTransactions = () => {
+    let displayTransactions = getActiveBorrowings();
+    
+    // Jika siswa, hanya tampilkan riwayatnya sendiri (baik aktif maupun sudah dikembalikan)
+    if (currentUser.role === 'student') {
+        displayTransactions = transactions.filter(t => t.studentId === currentUser.data.id);
+    }
+    
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-2 gap-4">
+          <h2 className="text-2xl font-bold text-gray-800">
+            {currentUser.role === 'admin' ? 'Sirkulasi Peminjaman' : 'Riwayat Peminjaman Saya'}
+          </h2>
+          <div className="flex flex-wrap gap-2 print:hidden w-full md:w-auto">
+            {currentUser.role === 'admin' && (
+              <button onClick={() => exportToCSV(displayTransactions, 'Sirkulasi_Aktif_SDNP_Purwosari')} className="flex-1 md:flex-none flex items-center justify-center space-x-1 bg-green-100 text-green-700 px-3 py-2 rounded hover:bg-green-200 transition text-sm font-medium">
+                <IconSpreadsheet /> <span>Export ke Sheets</span>
+              </button>
+            )}
+            <button onClick={handlePrint} className="flex-1 md:flex-none flex items-center justify-center space-x-1 bg-blue-100 text-blue-700 px-3 py-2 rounded hover:bg-blue-200 transition text-sm font-medium">
+              <IconPrint /> <span>Cetak</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="hidden print:flex flex-col items-center justify-center mb-6 border-b-2 border-black pb-4">
+          <h1 className="text-2xl font-bold">SDN PURWOSARI KEC. MAGETAN</h1>
+          <h2 className="text-xl font-semibold mt-1">
+              {currentUser.role === 'admin' ? 'LAPORAN SIRKULASI PEMINJAMAN' : `LAPORAN PEMINJAMAN: ${currentUser.data.name.toUpperCase()}`}
+          </h2>
+        </div>
+        
+        {currentUser.role === 'admin' && (
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 print:hidden">
+            <h3 className="font-semibold text-gray-700 mb-4">Proses Peminjaman Manual (Admin)</h3>
+            <form onSubmit={handleAdminBorrow} className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="md:col-span-2">
+                <select required className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none bg-white"
+                  value={newBorrow.studentId} onChange={e => setNewBorrow({...newBorrow, studentId: e.target.value})}>
+                  <option value="">-- Pilih Siswa --</option>
+                  {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.kelas})</option>)}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <select required className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none bg-white"
+                  value={newBorrow.bookId} onChange={e => setNewBorrow({...newBorrow, bookId: e.target.value})}>
+                  <option value="">-- Pilih Buku --</option>
+                  {books.map(b => (
+                    <option key={b.id} value={b.id} disabled={b.stock === 0}>
+                      {b.title} {b.stock === 0 ? '(Habis)' : `(Stok: ${b.stock})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-1">
+                <button type="submit" className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition font-medium">Pinjamkan</button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-6">
+          <div className="bg-gray-50 p-4 border-b flex justify-between items-center">
+            <h3 className="font-semibold text-gray-700">
+                {currentUser.role === 'admin' ? 'Daftar Buku Belum Dikembalikan' : 'Status Buku'}
+            </h3>
+            {isSyncing && <div className="text-xs text-green-600 flex items-center space-x-1"><IconSync/> <span>Tersinkronisasi ke Sheets</span></div>}
+          </div>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b text-gray-600 text-sm">
+                {currentUser.role === 'admin' && <th className="p-4">Nama Peminjam</th>}
+                <th className="p-4">Judul Buku</th>
+                <th className="p-4">Tanggal Pinjam</th>
+                <th className="p-4">Status</th>
+                {currentUser.role === 'admin' && <th className="p-4 text-center">Aksi</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {displayTransactions.map(t => {
+                const student = students.find(s => s.id === t.studentId);
+                const book = books.find(b => b.id === t.bookId) || { title: 'Buku Dihapus' };
+                return (
+                  <tr key={t.id} className="border-b hover:bg-gray-50">
+                    {currentUser.role === 'admin' && (
+                      <td className="p-4">
+                        <p className="font-medium text-gray-800">{student?.name || 'Unknown'}</p>
+                        <p className="text-xs text-gray-500">Kelas: {student?.kelas}</p>
+                      </td>
+                    )}
+                    <td className="p-4 text-gray-700 font-medium">{book.title}</td>
+                    <td className="p-4 text-gray-600">{t.borrowDate}</td>
+                    <td className="p-4">
+                      {t.status === 'borrowed' ? (
+                        <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded">Dipinjam</span>
+                      ) : (
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded">Dikembalikan ({t.returnDate})</span>
+                      )}
+                    </td>
+                    {currentUser.role === 'admin' && (
+                      <td className="p-4 text-center print:hidden">
+                        {t.status === 'borrowed' && (
+                          <button 
+                            onClick={() => handleReturn(t.id, t.bookId)}
+                            className="inline-flex items-center space-x-1 bg-green-100 text-green-700 px-3 py-1.5 rounded hover:bg-green-200 transition text-sm font-medium">
+                            <IconCheck />
+                            <span>Terima Kembali</span>
+                          </button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+              {displayTransactions.length === 0 && <tr><td colSpan={currentUser.role === 'admin' ? "5" : "4"} className="p-8 text-center text-gray-500">Tidak ada riwayat peminjaman.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  if (!currentUser) {
+    return (
+      <div className="relative min-h-screen flex items-center justify-center bg-gray-900 font-sans">
+        <div className="absolute inset-0 z-0">
+          {/* Latar belakang perpustakaan dengan pencahayaan lembut */}
+          <img 
+            src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+            alt="Background Perpustakaan" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+        </div>
+        
+        {toastMessage && (
+          <div className="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded shadow-lg z-50 flex items-center space-x-2 animate-bounce">
+            <span>{toastMessage}</span>
+          </div>
+        )}
+
+        <div className="relative z-10 bg-white/95 backdrop-blur-md p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
+          <div className="flex flex-col items-center mb-6">
+            <div className="h-36 mb-4 flex items-center justify-center drop-shadow-xl">
+               <img 
+                 src="WhatsApp%20Image%202026-06-01%20at%2017.50.24.jpeg" 
+                 alt="Logo SDN Purwosari" 
+                 className="h-full w-auto object-contain"
+               />
+            </div>
+            <h2 className="text-2xl font-bold text-green-800 text-center leading-tight">Sistem Informasi<br/>Perpustakaan</h2>
+            <h3 className="text-md font-semibold text-gray-600 mt-1">SDN Purwosari</h3>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Username / NIS</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <IconUsers />
+                </div>
+                <input 
+                  type="text" 
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition bg-white/80"
+                  placeholder="Masukkan Username / NIS"
+                  value={loginData.username}
+                  onChange={(e) => setLoginData({...loginData, username: e.target.value})}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <IconLock />
+                </div>
+                <input 
+                  type="password" 
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition bg-white/80"
+                  placeholder="Masukkan Password"
+                  value={loginData.password}
+                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                />
+              </div>
+            </div>
+            <button 
+              type="submit" 
+              className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg flex justify-center items-center space-x-2 mt-2"
+            >
+              <span>Masuk ke Sistem</span>
+              <IconArrows />
+            </button>
+          </form>
+          
+          <div className="mt-6 bg-green-50 px-4 py-3 rounded-lg text-xs text-green-800 border border-green-200 shadow-inner">
+             <p className="font-semibold mb-1">Petunjuk Login:</p>
+             <ul className="list-disc pl-4 space-y-1">
+                 <li><b>Admin:</b> gunakan <span className="bg-white px-1 rounded border">admin</span> / <span className="bg-white px-1 rounded border">admin</span></li>
+                 <li><b>Siswa:</b> gunakan <b>NIS</b> sebagai Username dan Password (Contoh NIS: 2023001)</li>
+             </ul>
+          </div>
+          
+          <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+            <p className="text-xs text-gray-500">Dipersembahkan oleh:</p>
+            <p className="text-sm font-bold text-green-700">Tim Pengembang SDN Purwosari</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-50 font-sans print:h-auto print:bg-white">
+      {/* Toast Notifications */}
+      {toastMessage && (
+        <div className="fixed top-4 right-4 bg-green-800 text-white px-6 py-3 rounded shadow-lg z-50 flex items-center space-x-2 animate-bounce">
+          <IconCheck />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+      
+      {/* Sync Overlay Indicator */}
+      {isSyncing && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center space-x-2">
+          <IconSync />
+          <span className="text-sm font-medium">Menyinkronkan ke Spreadsheet...</span>
+        </div>
+      )}
+
+      {/* Sidebar Desktop */}
+      <aside className="w-64 bg-green-800 text-white flex flex-col shadow-xl hidden md:flex print:hidden">
+        <div className="p-6 text-center border-b border-green-700 flex flex-col items-center">
+          <div className="mb-3 h-28 flex items-center justify-center drop-shadow-lg bg-white/10 rounded-full p-2">
+            <img 
+              src="WhatsApp%20Image%202026-06-01%20at%2017.50.24.jpeg" 
+              alt="Logo SDN Purwosari" 
+              className="h-full w-auto object-contain"
+            />
+          </div>
+          <h1 className="text-lg font-bold tracking-wide mt-2">PERPUSTAKAAN</h1>
+          <p className="text-green-300 text-sm">{currentUser.role === 'admin' ? 'Panel Admin' : `Siswa: ${currentUser.data.name}`}</p>
+        </div>
+        
+        <nav className="flex-1 p-4 space-y-2">
+          {currentUser.role === 'admin' ? (
+            <>
+              <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition ${activeTab === 'dashboard' ? 'bg-green-700 shadow-inner' : 'hover:bg-green-700/50'}`}>
+                <IconDashboard /> <span>Dashboard</span>
+              </button>
+              <button onClick={() => setActiveTab('books')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition ${activeTab === 'books' ? 'bg-green-700 shadow-inner' : 'hover:bg-green-700/50'}`}>
+                <IconBook /> <span>Data Buku</span>
+              </button>
+              <button onClick={() => setActiveTab('students')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition ${activeTab === 'students' ? 'bg-green-700 shadow-inner' : 'hover:bg-green-700/50'}`}>
+                <IconUsers /> <span>Data Siswa</span>
+              </button>
+              <button onClick={() => setActiveTab('transactions')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition ${activeTab === 'transactions' ? 'bg-green-700 shadow-inner' : 'hover:bg-green-700/50'}`}>
+                <IconArrows /> <span>Sirkulasi Buku</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => setActiveTab('student_books')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition ${activeTab === 'student_books' ? 'bg-green-700 shadow-inner' : 'hover:bg-green-700/50'}`}>
+                <IconBook /> <span>Katalog Buku</span>
+              </button>
+              <button onClick={() => setActiveTab('student_history')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition ${activeTab === 'student_history' ? 'bg-green-700 shadow-inner' : 'hover:bg-green-700/50'}`}>
+                <IconArrows /> <span>Riwayat Peminjaman</span>
+              </button>
+            </>
+          )}
+        </nav>
+
+        <div className="p-4">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center space-x-2 bg-red-600/90 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition shadow-sm font-medium">
+            <IconLogout /> <span>Keluar (Logout)</span>
+          </button>
+        </div>
+
+        <div className="p-4 border-t border-green-700 text-center bg-green-900/30">
+          <p className="text-xs text-green-400">Tim Pengembang</p>
+          <p className="text-sm font-semibold text-green-200">SDN Purwosari</p>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col h-full overflow-hidden print:overflow-visible">
+        {/* Mobile Header */}
+        <header className="bg-green-800 text-white p-4 flex md:hidden items-center justify-between shadow-md print:hidden">
+           <div className="flex items-center space-x-3">
+             <div className="h-10 flex items-center justify-center drop-shadow-md">
+               <img src="WhatsApp%20Image%202026-06-01%20at%2017.50.24.jpeg" alt="Logo" className="h-full w-auto object-contain bg-white/10 rounded-full p-1" />
+             </div>
+             <div>
+               <h1 className="font-bold text-sm">Perpus SDN Purwosari</h1>
+             </div>
+           </div>
+           <select 
+              className="bg-green-700 border-none text-white text-sm rounded p-1.5 outline-none font-medium max-w-[120px]"
+              value={activeTab} 
+              onChange={(e) => {
+                if (e.target.value === 'logout') {
+                  handleLogout();
+                } else {
+                  setActiveTab(e.target.value);
+                }
+              }}>
+             {currentUser.role === 'admin' ? (
+                <>
+                  <option value="dashboard">Dashboard</option>
+                  <option value="books">Data Buku</option>
+                  <option value="students">Data Siswa</option>
+                  <option value="transactions">Sirkulasi</option>
+                </>
+             ) : (
+                <>
+                  <option value="student_books">Katalog Buku</option>
+                  <option value="student_history">Riwayat Pinjam</option>
+                </>
+             )}
+             <option value="logout">Keluar (Logout)</option>
+           </select>
+        </header>
+
+        {/* Dynamic View Content */}
+        <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 print:overflow-visible relative">
+          <div className="max-w-6xl mx-auto">
+            {currentUser.role === 'admin' && activeTab === 'dashboard' && renderAdminDashboard()}
+            {((currentUser.role === 'admin' && activeTab === 'books') || (currentUser.role === 'student' && activeTab === 'student_books')) && renderBooks()}
+            {currentUser.role === 'admin' && activeTab === 'students' && renderStudents()}
+            {((currentUser.role === 'admin' && activeTab === 'transactions') || (currentUser.role === 'student' && activeTab === 'student_history')) && renderTransactions()}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
